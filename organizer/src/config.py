@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import argparse
 from typing import Dict, Any
@@ -72,9 +73,12 @@ def parse_args() -> Dict[str, Any]:
     config = load_config(args.config)
     
     # Корневая папка скрипта для разрешения относительных путей.
-    # Так как этот файл находится в src/, поднимаемся на уровень выше.
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    root_dir = os.path.dirname(script_dir)  # Корень проекта (папка "Фото")
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        script_dir = sys._MEIPASS
+        root_dir = os.path.dirname(sys.executable)
+    else:
+        script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        root_dir = os.path.dirname(script_dir)  # Корень проекта (папка "Фото")
     
     # Переопределяем параметры переданными CLI аргументами
     if args.source:
@@ -95,7 +99,10 @@ def parse_args() -> Dict[str, Any]:
     if args.db:
         config["db_path"] = os.path.abspath(args.db)
     elif not os.path.isabs(config["db_path"]):
-        config["db_path"] = os.path.abspath(os.path.join(script_dir, config["db_path"]))
+        if getattr(sys, 'frozen', False):
+            config["db_path"] = os.path.abspath(os.path.join(root_dir, "organizer", config["db_path"]))
+        else:
+            config["db_path"] = os.path.abspath(os.path.join(script_dir, config["db_path"]))
         
     if args.device:
         config["device"] = args.device

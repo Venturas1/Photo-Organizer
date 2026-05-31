@@ -12,8 +12,13 @@ from PIL import Image
 # pyrefly: ignore [missing-import]
 import eel
 
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    base_dir = sys._MEIPASS
+else:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
 # Додаємо папку src до шляху пошуку модулів
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
+sys.path.insert(0, os.path.join(base_dir, 'src'))
 
 # Імпорт існуючих модулів бэкенда
 # pyrefly: ignore [missing-import]
@@ -71,7 +76,11 @@ class EelStdoutRedirector:
 
 
 def setup_logging():
-    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "logs")
+    if getattr(sys, 'frozen', False):
+        app_dir = os.path.join(os.path.dirname(sys.executable), "organizer")
+    else:
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+    log_dir = os.path.join(app_dir, "data", "logs")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, "organizer.log")
     
@@ -340,7 +349,10 @@ def main():
     os.makedirs(CURRENT_CONFIG["dest_dir"], exist_ok=True)
     
     # Инициализация Eel (папка web лежит в той же директории, что и main.py)
-    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        web_dir = os.path.join(sys._MEIPASS, 'web')
+    else:
+        web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
     eel.init(web_dir)
     
     # Настраиваем перенаправление вывода после инициализации Eel
@@ -350,8 +362,8 @@ def main():
     print("Ініціалізація веб-інтерфейсу...")
     
     try:
-        # Запускаем окно Chrome размером 850x700
-        eel.start('index.html', size=(850, 700), mode='chrome')
+        # Запускаем окно Chrome размером 850x700, port=0 выбирает случайный свободный порт
+        eel.start('index.html', size=(850, 700), mode='chrome', port=0)
     except (SystemExit, MemoryError, KeyboardInterrupt):
         logger.info("Програму закрито.")
 
