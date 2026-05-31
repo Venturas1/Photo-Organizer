@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints
+
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Project Specific Data & Models
+organizer/data/database.db
+organizer/data/models/
+organizer/data/logs/
+organizer/data/*.db
+
+# Inputs and Outputs (directories with media files)
+input/
+output/
+
+# OS files
+Thumbs.db
+db.properties
+.DS_Store
+
+# IDE and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.agents 
+errors.md
+memory.md
+gui_app.py.bak

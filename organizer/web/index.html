@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Organizer</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Google Fonts: Outfit & Inter for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Eel integration script -->
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body class="dark-theme">
+    <!-- Dynamic background gradients -->
+    <div class="bg-gradient-glow"></div>
+    <div class="bg-gradient-glow-secondary"></div>
+
+    <!-- Theme Switcher & System Controls -->
+    <div class="top-controls">
+        <button id="theme-toggle" class="control-btn" title="Змінити тему">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="app-container">
+        
+        <!-- ================= EXRAN NASTROEK (Settings Screen) ================= -->
+        <section id="screen-settings" class="screen-view active">
+            <header class="screen-header">
+                <h1 class="app-title">Photo Organizer</h1>
+                <p class="app-subtitle">Розумне сортування медіаархіву за допомогою ШІ</p>
+            </header>
+            
+            <div class="glass-card settings-card">
+                <!-- Source Directory -->
+                <div class="form-group">
+                    <label for="input-source-dir">Вихідна папка</label>
+                    <div class="input-picker-group">
+                        <input type="text" id="input-source-dir" placeholder="Оберіть папку з оригінальними фото..." readonly>
+                        <button id="btn-browse-source" class="btn-secondary">
+                            <span>Огляд</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Destination Directory -->
+                <div class="form-group">
+                    <label for="input-dest-dir">Цільова папка</label>
+                    <div class="input-picker-group">
+                        <input type="text" id="input-dest-dir" placeholder="Оберіть папку для збереження структури..." readonly>
+                        <button id="btn-browse-dest" class="btn-secondary">
+                            <span>Огляд</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Device Selector -->
+                    <div class="form-group">
+                        <label>Обчислювальний пристрій</label>
+                        <div class="segment-control">
+                            <input type="radio" id="device-cpu" name="device-select" value="cpu" checked>
+                            <label for="device-cpu" class="segment-item">CPU</label>
+                            
+                            <input type="radio" id="device-cuda" name="device-select" value="cuda">
+                            <label for="device-cuda" class="segment-item">CUDA (GPU)</label>
+                            
+                            <div class="segment-slider"></div>
+                        </div>
+                    </div>
+
+                    <!-- Clean DB Checkbox -->
+                    <div class="form-group checkbox-group-container">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="chk-reset-db">
+                            <span class="custom-checkbox">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                            <span class="checkbox-label">Очистити базу даних під час запуску</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="action-container">
+                    <button id="btn-start-pipeline" class="btn-primary">
+                        <span>Розпочати обробку</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= EXRAN PROGRESSA (Pipeline Progress Screen) ================= -->
+        <section id="screen-progress" class="screen-view">
+            <header class="screen-header">
+                <h1 id="progress-stage-title" class="app-title">Підготовка конвеєра</h1>
+                <p id="progress-stage-subtitle" class="app-subtitle">Ініціалізація модулей обробки...</p>
+            </header>
+
+            <div class="glass-card progress-card">
+                <!-- Progress Indicator -->
+                <div class="progress-bar-container">
+                    <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progress-percent">0%</span>
+                </div>
+
+                <!-- Collapsible Log Details -->
+                <div class="log-details-container">
+                    <button id="btn-toggle-logs" class="btn-log-toggle">
+                        <span>Показати деталі</span>
+                        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="log-panel" class="log-panel collapsed">
+                        <div id="log-content" class="log-content-area"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= EXRAN RAZMETKI (Labeling Screen) ================= -->
+        <section id="screen-labeling" class="screen-view">
+            <header class="screen-header-inline">
+                <div>
+                    <h1 class="cluster-title">Група: <span id="labeling-cluster-id">#0</span></h1>
+                    <p class="cluster-subtitle">Знайдено <span id="labeling-photo-count">0</span> схожих облич</p>
+                </div>
+                <div class="cluster-header-actions">
+                    <button id="btn-undo" class="control-btn btn-undo-header hidden" title="Скасувати (Ctrl+Z)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                    </button>
+                    <div class="cluster-navigation-stats">
+                        Кластер <span id="current-cluster-index">0</span> з <span id="total-clusters-count">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Face Grid Area -->
+            <div class="faces-grid-container">
+                <div id="faces-grid" class="faces-grid">
+                    <!-- Dynamic cards injected via JS -->
+                </div>
+            </div>
+
+            <!-- Floating Selection Toolbar (appears when items are selected) -->
+            <div id="selection-toolbar" class="selection-toolbar hidden">
+                <span class="selection-count">Вибрано облич: <strong id="selected-count-value">0</strong></span>
+                <div class="selection-actions">
+                    <button id="btn-delete-selected" class="btn-primary btn-danger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        <span>У шум</span>
+                    </button>
+                    <button id="btn-move-selected" class="btn-secondary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                        <span>Перенести</span>
+                    </button>
+                    <button id="btn-clear-selection" class="btn-secondary">Скинути</button>
+                </div>
+            </div>
+
+            <!-- Footer Name Input & Actions -->
+            <footer class="labeling-footer glass-footer">
+                <div class="name-input-wrapper">
+                    <input type="text" id="input-cluster-name" placeholder="Введіть ім'я людини..." autocomplete="off">
+                    <!-- Autocomplete dropdown suggestions -->
+                    <div id="autocomplete-list" class="autocomplete-dropdown hidden">
+                        <!-- Items injected dynamically -->
+                    </div>
+                </div>
+                <div class="footer-buttons">
+                    <button id="btn-skip-cluster" class="btn-secondary">Пропустити</button>
+                    <button id="btn-save-cluster" class="btn-primary">Зберегти</button>
+                </div>
+            </footer>
+        </section>
+
+    </main>
+
+    <!-- ================= MODAL: Fullscreen Preview with Spotlight ================= -->
+    <div id="preview-modal" class="modal-overlay hidden">
+        <div class="modal-content-container">
+            <button id="btn-close-preview" class="close-modal-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="preview-viewport">
+                <!-- Base image -->
+                <img id="preview-image" src="" alt="Оригінал">
+                <!-- SVG Spotlight Mask -->
+                <svg id="preview-svg-overlay" class="spotlight-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <defs>
+                        <mask id="spotlight-mask">
+                            <!-- White fills everything (fully visible) -->
+                            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                            <!-- Black circle cuts a hole (makes it transparent / reveals image underneath) -->
+                            <circle id="spotlight-circle" cx="50" cy="50" r="15" fill="black" />
+                        </mask>
+                    </defs>
+                    <!-- Semi-transparent dark background layer masked to show spotlight hole -->
+                    <rect x="0" y="0" width="100%" height="100%" fill="rgba(0, 0, 0, 0.75)" mask="url(#spotlight-mask)" />
+                    <!-- Spotlight ring border -->
+                    <circle id="spotlight-border" cx="50" cy="50" r="15" fill="none" stroke="var(--accent-primary)" stroke-width="3" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL/POPOVER: Move Face to Existing Cluster ================= -->
+    <div id="move-modal" class="modal-overlay hidden">
+        <div class="modal-glass-card">
+            <h3>Перенести в існуючий кластер</h3>
+            <p>Оберіть групу для переміщення виділеного обличчя:</p>
+            <div class="cluster-search-wrapper">
+                <input type="text" id="input-move-search" placeholder="Пошук групи за ім'ям..." autocomplete="off">
+            </div>
+            <div class="cluster-options-list" id="move-cluster-list">
+                <!-- Dynamic items injected here -->
+            </div>
+            <div class="modal-footer-actions">
+                <button id="btn-cancel-move" class="btn-secondary">Скасувати</button>
+                <button id="btn-confirm-move" class="btn-primary" disabled>Перенести</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
